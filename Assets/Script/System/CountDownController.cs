@@ -7,6 +7,7 @@ public class CountDownController : MonoBehaviour
 {
     private TextMeshProUGUI countdownTMP;
     private int count;
+    
     private async void OnEnable()
     {
         countdownTMP = GetComponent<TextMeshProUGUI>();

@@ -24,6 +24,11 @@ public class GameController : MonoBehaviour
     public event Action<MonsterWaveState> OnProgressMonsterActive;
     public event Action OnUIProgressToClear;
     public event Action OnUIProgressToDefeat;
+
+    // 스킬 리셋
+    public event Action OnSkillReset;
+    
+    public event Action OnInGameStart;
     
     // 요새 스탯관리
     [SerializeField]private int fortressHp =0;
@@ -176,9 +181,8 @@ public class GameController : MonoBehaviour
             killCount = 0;
             // 웨이브 레벨에 따라 공식 적용 필요
             goalKillCount = waveLevel * 2;
-             OnReadyMonsterSpawn?.Invoke(goalKillCount);
-             // UI 변경
-             
+            OnReadyMonsterSpawn?.Invoke(goalKillCount);
+            // UI 변경
              
         }
         else if (currentWaveState == WaveState.Start)
@@ -186,6 +190,8 @@ public class GameController : MonoBehaviour
             // 카운트 다운 이벤트 함수 실행
             countdownObject.SetActive(true);
             // UI 변경
+            // 카운트 다운 이후 스킬 사용가능하도록
+            OnInGameStart?.Invoke();
         }
         else if (currentWaveState == WaveState.Progress)
         {
@@ -193,10 +199,13 @@ public class GameController : MonoBehaviour
             OnProgressPlayerControl?.Invoke(PlayerState.Attack);
             OnProgressMonsterActive?.Invoke(MonsterWaveState.Active);
             // UI 변경
+                        
         }
         else if (currentWaveState == WaveState.End)
         {
             OnProgressPlayerControl?.Invoke(PlayerState.Idle);
+            // 스킬 쿨타임 초기화
+            OnSkillReset?.Invoke();
             
             if (IsFortressDestoryed())
             {
