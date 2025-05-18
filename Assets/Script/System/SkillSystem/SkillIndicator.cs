@@ -10,24 +10,8 @@ public class SkillIndicator : MonoBehaviour
     private bool isTargeting = false;
     
     private Camera mainCamera;
+    private float inGameGroundHeight = 1f;
     
-    public void StartTargeting(GameObject indicatorPrefab, Action<Vector3> onConfirm)
-    {
-        if (isTargeting)
-        {
-            return;
-        }
-
-
-        isTargeting = true;
-        targetingPanel.SetActive(true);
-
-        onTargetConfirmed = onConfirm;
-        currentIndicator = Instantiate(indicatorPrefab, targetingPanel.transform);
-
-        UpdateIndicatorPositionToMouse();
-    }
-
     private void Start()
     {
         targetingPanel.SetActive(false);
@@ -51,6 +35,25 @@ public class SkillIndicator : MonoBehaviour
         }
     }
 
+    public void StartTargeting(GameObject indicatorPrefab, Action<Vector3> onConfirm)
+    {
+        if (isTargeting)
+        {
+            return;
+        }
+
+
+        isTargeting = true;
+        targetingPanel.SetActive(true);
+        Time.timeScale = 0.5f;
+        Time.fixedDeltaTime = 0.02f * Time.timeScale;
+        
+        onTargetConfirmed = onConfirm;
+        currentIndicator = Instantiate(indicatorPrefab, targetingPanel.transform);
+
+        UpdateIndicatorPositionToMouse();
+    }
+    
     private void UpdateIndicatorPositionToMouse()
     {
         Vector2 localPoint;
@@ -65,7 +68,7 @@ public class SkillIndicator : MonoBehaviour
             out localPoint
         );
 
-        // 인디케이터 크기 고려한 클램프 위치 계산
+        // 인디케이터 크기 맞춤으로 제작
         Vector2 clampedPosition = ClampToPanel(panelRect, indicatorRect, localPoint);
 
         // 위치 적용
@@ -95,17 +98,6 @@ public class SkillIndicator : MonoBehaviour
         return RectTransformUtility.RectangleContainsScreenPoint(panelRect, Input.mousePosition);
     }
 
-    private Vector3 GetTargetWorldPosition()
-    {
-        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-        if (Physics.Raycast(ray, out RaycastHit hit, 100f))
-        {
-            return hit.point;
-        }
-
-        return Vector3.zero;
-    }
-
     private void EndTargeting()
     {
         isTargeting = false;
@@ -118,5 +110,20 @@ public class SkillIndicator : MonoBehaviour
         }
 
         onTargetConfirmed = null;
+        
+        // 슬로우 모션 해제
+        Time.timeScale = 1f;
+        Time.fixedDeltaTime = 0.02f;
+    }
+    
+    private Vector3 GetTargetWorldPosition()
+    {
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        if (Physics.Raycast(ray, out RaycastHit hit, 100f))
+        {
+            return new Vector3(hit.point.x, inGameGroundHeight, hit.point.z);
+        }
+
+        return Vector3.zero;
     }
 }

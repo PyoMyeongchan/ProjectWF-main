@@ -27,7 +27,7 @@ public class GameController : MonoBehaviour
 
     // 스킬 리셋
     public event Action OnSkillReset;
-    
+    // 카운트 다운 이후 게임 시작
     public event Action OnInGameStart;
     
     // 요새 스탯관리

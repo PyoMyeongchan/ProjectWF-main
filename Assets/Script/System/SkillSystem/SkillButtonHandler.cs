@@ -24,6 +24,20 @@ public class SkillButtonHandler : MonoBehaviour
     [SerializeField] private GameObject skillEffectPrefab;
     private bool isSkillLocked = false;
 
+    private void OnEnable()
+    {
+        GameController.Instance.OnSkillReset += ResetCooldown;
+        GameController.Instance.OnInGameStart += InGameSkill;
+    }
+
+    private void OnDisable()
+    {
+        if (GameController.Instance != null)
+        {
+            GameController.Instance.OnSkillReset -= ResetCooldown;
+        }
+    }
+    
     private void Start()
     {
         backGroundImage.sprite = cooldownFillImage.sprite;
@@ -51,7 +65,7 @@ public class SkillButtonHandler : MonoBehaviour
         StartCooldown().Forget();
     }
     
-    
+    // 프레임마다 대기하며 쿨타임 UI 갱신
     private async UniTaskVoid StartCooldown()
     {
         float timer = skillCooltime;
@@ -79,20 +93,6 @@ public class SkillButtonHandler : MonoBehaviour
         backGroundImage.color = Color.white;
         GetComponent<Image>().color = Color.white;
     }   
-
-    private void OnEnable()
-    {
-        GameController.Instance.OnSkillReset += ResetCooldown;
-        GameController.Instance.OnInGameStart += InGameSkill;
-    }
-
-    private void OnDisable()
-    {
-        if (GameController.Instance != null)
-        {
-            GameController.Instance.OnSkillReset -= ResetCooldown;
-        }
-    }
 
     private void ResetCooldown()
     {
